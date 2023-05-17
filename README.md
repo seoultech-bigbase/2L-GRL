@@ -26,6 +26,19 @@ improves the accuracy of the existing GRL models by up to 15.68% and reduces the
 verify the scalability of our model with respect to dataset size and the number of CPU cores, as well as its representation effectiveness
 and efficiency compared to the existing graph partitioning algorithm. 
 
+## Requirements
+- python==3.6.13
+- gensim==3.8.3
+- igraph==0.9.11
+- keras==2.6.0
+- matplotlib==3.3.4
+- networkx==2.5.1
+- numpy==1.19.5
+- pandas==1.1.5
+- scikit-learn==0.24.2
+- scipy==1.5.4
+- stellargraph==1.2.1
+- tensorflow==2.6.2
 
 ## Implementation
 
@@ -93,13 +106,6 @@ dependencies in it:
 ## Environments
 
 We use Intel Xeon Silver 4210R 20-core CPU @ 2.40 GHz and 32 GB RAM running on Ubuntu 18.04.6 LTS.
-
-### Prerequisite
-- Python (version 3.6.13)
-- iGraph Python library (version 0.9.9)
-- StellarGraph library (version 1.2.1)
-- TensorFlow Keras (version 2.6.2)
-- Gensim (version 4.1.2)
 
 
 ## Reproducing the results
