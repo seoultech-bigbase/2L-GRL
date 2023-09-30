@@ -12,10 +12,15 @@ from sklearn import preprocessing, feature_extraction, model_selection
 from IPython.display import display, HTML
 import matplotlib.pyplot as plt
 
-
-class GCN():
-    def node_classification(G, node_subjects, args):
+import time
+class GCNModel():
+    def node_classification(G, node_subjects):
         # Splitting the data
+        epochs = 20  
+        train_size = 0.2
+        test_size = 0.15
+        val_size = 0.2
+        batch_size = 50
         train_subjects, test_subjects = model_selection.train_test_split(node_subjects, train_size=train_size, test_size=None, stratify=node_subjects)
         val_subjects, test_subjects = model_selection.train_test_split(test_subjects, train_size=test_size, test_size=None, stratify=test_subjects)
 
@@ -84,7 +89,7 @@ class GCN():
         # Baseline Performance Evaluation
         X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.3, shuffle=True, random_state=1)
         model_emb = keras.models.Sequential()
-        model_emb.add(layers.Dense(train_targets.shape[1], activation='softmax', input_shape=(16,)))
+        model_emb.add(layers.Dense(train_targets.shape[1], activation='softmax', input_shape=(32,)))
         model_emb.compile(keras.optimizers.Adam(learning_rate=0.01), 
                     loss=keras.losses.categorical_crossentropy,
                     metrics=['accuracy'])
@@ -104,7 +109,7 @@ class GCN():
         print("test loss, test acc:", results)
         return X
 
-    def link_prediction(G, args):
+    def link_prediction(G):
         # Define an edge splitter on the original graph G
         edge_splitter_test = EdgeSplitter(G)
 
@@ -166,7 +171,7 @@ class GCN():
             print("\t{}: {:0.4f}".format(name, val))
 
 
-    def subgraph_learning(subgraphList, args):
+    def subgraph_learning(subgraphList):
         subgraph = ig.induced_subgraph(subgraphList,implementation="create_from_scratch")
         fea_mat_temp = fea_mat[fea_mat.index.isin(subgraph.vs['_nx_name'])] # subgraph들의 feature 추출
         
