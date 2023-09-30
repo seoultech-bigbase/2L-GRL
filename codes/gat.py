@@ -1,7 +1,9 @@
 import networkx as nx
 import pandas as pd
+import numpy as np
+import keras
 import os
-
+import time
 import stellargraph as sg
 from stellargraph.mapper import FullBatchNodeGenerator
 from stellargraph.layer import GAT
@@ -13,14 +15,14 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
-class GAT():
-    def node_classification(G):
+class GATModel():
+    def node_classification(G,node_subjects):
         # Splitting the data
         train_subjects, test_subjects = model_selection.train_test_split(
-            node_subjects, train_size=140, test_size=None, stratify=node_subjects
+            node_subjects, train_size=0.6, test_size=None
         )
         val_subjects, test_subjects = model_selection.train_test_split(
-            test_subjects, train_size=500, test_size=None, stratify=test_subjects
+            test_subjects, train_size=0.6, test_size=None
         )
 
         # Converting to numeric arrays
@@ -34,6 +36,7 @@ class GAT():
 
         # Creating the GAT layers
         generator = FullBatchNodeGenerator(G, method="gat")
+        print(train_subjects.index)
         train_gen = generator.flow(train_subjects.index, train_targets)
 
         gat = GAT(
@@ -68,7 +71,7 @@ class GAT():
 
         history = model.fit(
             train_gen,
-            epochs=50,
+            epochs=1,
             validation_data=val_gen,
             verbose=2,
             shuffle=False,  # this should be False, since shuffling data means shuffling the whole graph
@@ -104,7 +107,7 @@ class GAT():
         # Baseline Performance Evaluation
         X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.3, shuffle=True, random_state=1)
         model_emb = keras.models.Sequential()
-        model_emb.add(layers.Dense(train_targets.shape[1], activation='softmax', input_shape=(16,)))
+        model_emb.add(layers.Dense(1, activation='softmax', input_shape=(64,)))
         model_emb.compile(keras.optimizers.Adam(learning_rate=0.01), 
                     loss=keras.losses.categorical_crossentropy,
                     metrics=['accuracy'])
@@ -112,7 +115,7 @@ class GAT():
         start = time.time()
         history = model_emb.fit(X_train,
                             y_train,
-                            epochs=50,
+                            epochs=1,
                             verbose=0,
                             shuffle=False,
                             batch_size=128)
@@ -124,7 +127,7 @@ class GAT():
         print("test loss, test acc:", results)
 
 
-    def subgraph_learning(subgraphList):
+    def subgraph_learning(subgraphList,fea_mat):
         subgraph = ig.induced_subgraph(subgraphList,implementation="create_from_scratch")
         fea_mat_temp = fea_mat[fea_mat.index.isin(subgraph.vs['_nx_name'])] # subgraph들의 feature 추출
         
