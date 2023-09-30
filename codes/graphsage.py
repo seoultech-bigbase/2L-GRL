@@ -1,8 +1,29 @@
-class GraphSAGE():
+import pandas as pd
+from igraph import Graph
+import igraph 
+import matplotlib.pyplot as plt
+import networkx as nx
+from collections import Counter
+from stellargraph import StellarGraph, datasets
+from stellargraph.data import EdgeSplitter
+import numpy as np
+import stellargraph as sg
+import pickle
+from stellargraph.data import UnsupervisedSampler
+from stellargraph.mapper import GraphSAGELinkGenerator,GraphSAGENodeGenerator
+from stellargraph.layer import GraphSAGE, link_classification
+from stellargraph.data import UniformRandomWalk
+from tensorflow import keras
+import time
+from collections import defaultdict
+from sklearn import preprocessing, feature_extraction, model_selection
+from tensorflow.keras import layers, optimizers, losses, metrics, Model
+
+class GraphSAGEModel():
     
-    def node_classification(G, node_subjects, args):
+    def node_classification(G, node_subjects):
         #Global parameters
-        epochs = 20  
+        epochs = 1 
         train_size = 0.2
         test_size = 0.15
         val_size = 0.2
@@ -10,8 +31,8 @@ class GraphSAGE():
         num_samples = [10, 5]
 
         # Splitting the data
-        train_subjects, test_subjects = model_selection.train_test_split(node_subjects, train_size=train_size, test_size=None, stratify=node_subjects)
-        val_subjects, test_subjects = model_selection.train_test_split(test_subjects, train_size=test_size, test_size=None, stratify=test_subjects)
+        train_subjects, test_subjects = model_selection.train_test_split(node_subjects, train_size=train_size, test_size=None) #, stratify=node_subjects
+        val_subjects, test_subjects = model_selection.train_test_split(test_subjects, train_size=test_size, test_size=None)
 
         # Converting to numeric arrays
         target_encoding = preprocessing.LabelBinarizer()
@@ -26,12 +47,13 @@ class GraphSAGE():
         generator = GraphSAGENodeGenerator(G, batch_size, num_samples)
         train_gen = generator.flow(train_subjects.index, train_targets, shuffle=True)
 
+
         graphsage_model = GraphSAGE(
             layer_sizes=[32, 32], generator=generator, bias=True, dropout=0.5,
         )
 
         x_inp, x_out = graphsage_model.in_out_tensors()
-        prediction = layers.Dense(units=train_targets.shape[1], activation="softmax")(x_out)
+        prediction = layers.Dense(train_targets.shape[1], activation="softmax")(x_out)
         
         # Training the model
         model = Model(inputs=x_inp, outputs=prediction)
@@ -40,21 +62,23 @@ class GraphSAGE():
             loss=losses.categorical_crossentropy,
             metrics=["acc"],
         )
+        
+        test_gen = generator.flow(test_subjects.index, test_targets)
 
         history = model.fit(
-            train_gen, epochs=20, validation_data=test_gen, verbose=2, shuffle=False
+            train_gen, epochs=epochs, validation_data=test_gen, verbose=2, shuffle=False
         )
         print("\nTraining Done! (Time: ",time.time() - start, ")")
 
-        # Plotting
+        """# Plotting
         sg.utils.plot_history(history)
 
         # Evaluating
-        test_gen = generator.flow(test_subjects.index, test_targets)
+        
         test_metrics = model.evaluate(test_gen)
         print("\nTest Set Metrics:")
         for name, val in zip(model.metrics_names, test_metrics):
-            print("\t{}: {:0.4f}".format(name, val))
+            print("\t{}: {:0.4f}".format(name, val))"""
 
         # Making predictions with the model
         all_nodes = node_subjects.index
@@ -68,11 +92,12 @@ class GraphSAGE():
 
         X = emb
         y = np.argmax(target_encoding.transform(node_subjects), axis=1)
+        
 
         # Baseline Performance Evaluation
         X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.3, shuffle=True, random_state=1)
         model_emb = keras.models.Sequential()
-        model_emb.add(layers.Dense(train_targets.shape[1], activation='softmax', input_shape=(16,)))
+        model_emb.add(layers.Dense(1, activation='softmax', input_shape=(32,)))
         model_emb.compile(keras.optimizers.Adam(learning_rate=0.01), 
                     loss=keras.losses.categorical_crossentropy,
                     metrics=['accuracy'])
@@ -90,9 +115,16 @@ class GraphSAGE():
         print("Evaluate the baseline performance on node classification task")
         results = model_emb.evaluate(X_test, y_test, batch_size=128)
         print("test loss, test acc:", results)
+        return emb
 
 
-    def link_prediction(G, args):
+    def link_prediction(G):
+        epochs = 1 
+        train_size = 0.2
+        test_size = 0.15
+        val_size = 0.2
+        batch_size = 50
+        num_samples = [10, 5]
         # Define an edge splitter on the original graph G
         edge_splitter_test = EdgeSplitter(G)
 
@@ -120,7 +152,7 @@ class GraphSAGE():
         test_flow = test_gen.flow(edge_ids_test, edge_labels_test)
 
         graphsage = GraphSAGE(
-            layer_sizes=layer_sizes, generator=train_gen, bias=True, dropout=0.3
+            layer_sizes=[32, 32], generator=train_gen, bias=True, dropout=0.3
         )
 
         # Build the model and expose input and output sockets of graphsage model for link prediction
@@ -164,11 +196,15 @@ class GraphSAGE():
         
         return node_embeddings
 
-    def subgraph_learning(subgraphList, args):
+    def subgraph_learning(ig, subgraphList, node_features):
+        val_size = 0.2
+        batch_size = 50
+        num_samples = [10, 5]
+        layer_sizes=[32, 32]
         subgraph = ig.induced_subgraph(subgraphList,implementation="create_from_scratch")
         subnode_features = node_features[node_features.index.isin(subgraph.vs['_nx_name'])] # subgraph들의 feature 추출
 
-        subgraph_ = StellarGraph.from_networkx(subgraph.to_networkx(), node_features = subnode_features.reset_index(drop=True))
+        subgraph_ = StellarGraph.from_networkx(subgraph.to_networkx(), node_features = subnode_features)
     
         subnodes = list(subgraph_.nodes())
         sub_unsupervised_samples = UnsupervisedSampler(
