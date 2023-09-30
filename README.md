@@ -1,7 +1,6 @@
 # Two-Level Graph Representation Learning with Community-as-a-Node Graphs
 
-
-This paper has been submitted for publication in SIGMOD 2024.
+The source code for the paper "Two-Level Graph Representation Learning with Community-as-a-Node Graphs", accepted at ICDM 2023.
 
 ![](fig.png)
 
@@ -10,21 +9,7 @@ This paper has been submitted for publication in SIGMOD 2024.
 
 ## Abstract
 
-> In this paper,we propose a novel graph representation learning (GRL) model, Two-Level GRL with Community-as-a-Node (simply, CaaN
-2L-GRL). To achieve to improve both representation accuracy and learning efficiency, we first design a Two-Level GRL architecture
-based on the partitioning of the graph: 1) local GRL on nodes within each partitioned subgraph and 2) global GRL on subgraphs. By partitioning
-the graph through community detection, we focus on each community individually and enable elaborate node learning
-in the same community. Based on Two-Level GRL, we propose an abstracted graph, Community-as-a-Node Graph (simply, CaaN), to
-effectively maintain the high-level structure while dramatically reducing the size of the graph. By applying the CaaN graph to
-local and global GRLs, we propose CaaN 2L-GRL that effectively maintains the global structure of the entire graph while accurately
-representing the nodes in each community. A salient point of the proposed model is that it can improve performance in terms of
-both accuracy and efficiency by being applied to any existing GRL model. Through extensive experiments, we show that CaaN 2L-GRL
-outperforms the existing models in both accuracy and efficiency. To show the coverage of our model, we adopt a total of seven GRL
-models including the widely used and latest models. Specifically, in link prediction, CaaN 2L-GRL significantly improves the AUC
-value of the existing GRL models by up to 12.47% and reduces their learning time by up to 48.10%. In node classification, CaaN 2L-GRL
-improves the accuracy of the existing GRL models by up to 15.68% and reduces their learning time by up to 42.79%. Furthermore, we
-verify the scalability of our model with respect to dataset size and the number of CPU cores, as well as its representation effectiveness
-and efficiency compared to the existing graph partitioning algorithm. 
+> In this paper, we propose a novel graph representation learning (GRL) model that aims to improve both representation accuracy and learning efficiency. We design a Two-Level GRL architecture based on the graph partitioning: 1) local GRL on nodes within each partitioned subgraph and 2) global GRL on subgraphs. By partitioning the graph through community detection, we enable elaborate node learning in the same community. Based on Two-Level GRL, we introduce an abstracted graph, Community-as-a-Node Graph (CaaN), to effectively maintain the high-level structure with a significantly reduced graph. By applying the CaaN graph to local and global GRL, we propose Two-Level GRL with Community-as-a-Node (CaaN 2L) that effectively maintains the global structure of the entire graph while accurately representing the nodes in each community. A salient point of the proposed model is that it can be applied to any existing GRL model by adopting it as the base model for local and global GRL. Through extensive experiments employing seven popular GRL models, we show that our model outperforms them in both accuracy and efficiency.
 
 ## Requirements
 - python==3.6.13
@@ -108,9 +93,23 @@ dependencies in it:
 We use Intel Xeon Silver 4210R 20-core CPU @ 2.40 GHz and 32 GB RAM running on Ubuntu 18.04.6 LTS.
 
 
-## Reproducing the results
+## Implementation
 
-All codes are all run inside [Jupyter notebooks](http://jupyter.org/) yet in the `codes` folder.
+### How to run CaaN 2L GRL
 
-We will update by creating python scripts to automate our proposed model soon. 
+    python main.py --dataset PubMed --size_thresh 100 --model gcn --task node --cd_algo LP
+    
+### Hyperparameters
+The following Options can be passed to `main.py`
 
+`--dataset`: Name of the dataset. (Supported names are: Foursquare, Flickr, PubMed, and CiteSeer.)
+
+`--size_thresh`: Threshold value which is the minimum number of nodes to be defined as major communities.
+
+`--model`: Name of base GRL model to use. (Supported names are: gcn, graphsage, gat, and node2vec.)
+
+`--task`: Type of downstream task: node classification or link prediction
+
+`--cd_algo`: Name of the community detection algorithm to use (Supported names are: LP, MM, EG, RW, and IM.)
+
+All other codes can be found in the `codes` folder via [Jupyter notebooks](http://jupyter.org/).
