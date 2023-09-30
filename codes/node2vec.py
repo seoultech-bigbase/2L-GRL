@@ -24,8 +24,8 @@ from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler
 
 
-class Node2Vec():
-    def node_classification(G, node_subjects, args):
+class Node2VecModel():
+    def node_classification(G, node_subjects):
         walk_number = 100
         walk_length = 5
         batch_size = 50
@@ -96,7 +96,7 @@ class Node2Vec():
         # Evaluate the baseline model on the test data 
         accuracy_score(y_test, y_pred)
 
-    def link_prediction(G, args):
+    def link_prediction(G):
         # Define an edge splitter on the original graph:
         edge_splitter_test = EdgeSplitter(graph)
 
@@ -259,7 +259,7 @@ class Node2Vec():
             f"ROC AUC score on test set using '{best_result['binary_operator'].__name__}': {test_score}"
         )
 
-    def subgraph_learning(subgraphList, args):
+    def subgraph_learning(subgraphList):
         subgraph = ig.induced_subgraph(subgraphList,implementation="create_from_scratch")
         isin_filter = node_features_encoded['userID'].isin(subgraph.vs['id'])
         
