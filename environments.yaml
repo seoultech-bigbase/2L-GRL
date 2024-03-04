@@ -1,0 +1,62 @@
+name: jeongha
+channels:
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - ca-certificates=2022.10.11=h06a4308_0
+  - certifi=2021.5.30=py36h06a4308_0
+  - ld_impl_linux-64=2.35.1=h7274673_9
+  - libffi=3.3=he6710b0_2
+  - libgcc-ng=9.1.0=hdf63c60_0
+  - libstdcxx-ng=9.1.0=hdf63c60_0
+  - ncurses=6.3=h7f8727e_2
+  - openssl=1.1.1s=h7f8727e_0
+  - pip=21.2.2=py36h06a4308_0
+  - python=3.6.13=h12debd9_1
+  - readline=8.1.2=h7f8727e_1
+  - setuptools=58.0.4=py36h06a4308_0
+  - sqlite=3.37.0=hc218d9a_0
+  - tk=8.6.11=h1ccaba5_0
+  - wheel=0.37.1=pyhd3eb1b0_0
+  - xz=5.2.5=h7b6447c_0
+  - zlib=1.2.11=h7f8727e_4
+  - pip:
+    - beautifulsoup4==4.10.0
+    - cycler==0.11.0
+    - dataclasses==0.6
+    - decorator==4.4.2
+    - deeprobust==0.2.8
+    - flwr==0.17.0
+    - gensim==3.8.3
+    - google==2.0.3
+    - grpcio==1.43.0
+    - imageio==2.15.0
+    - importlib-resources==5.4.0
+    - kiwisolver==1.3.1
+    - llvmlite==0.36.0
+    - matplotlib==3.3.4
+    - metis==0.2a5
+    - networkx==2.5.1
+    - numba==0.53.1
+    - numpy==1.19.5
+    - packaging==21.3
+    - pillow==8.4.0
+    - protobuf==3.19.4
+    - pyparsing==3.0.9
+    - python-dateutil==2.8.2
+    - pywavelets==1.1.1
+    - scikit-image==0.17.2
+    - six==1.16.0
+    - smart-open==6.3.0
+    - soupsieve==2.3.1
+    - tensorboardx==2.6
+    - texttable==1.6.7
+    - tifffile==2020.9.3
+    - torch==1.8.1+cu111
+    - torchaudio==0.8.1
+    - torchvision==0.9.1+cu111
+    - tqdm==4.64.1
+    - typing-extensions==4.0.1
+    - zipp==3.6.0
+prefix: /home/jhpark/anaconda3/envs/jeongha
+
